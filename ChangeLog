@@ -1,4 +1,9 @@
 2002-11-18 nalin
+* configure.ac: use more compiler warnings if we're using gcc
+* src/parsers.h:  declare external parsers so that everything agrees on their
+  signatures.
+
+2002-11-18 nalin
 * src/files-parse.c, src/glibc-parse.c: add glibc-based parsing internally
 * src/passwd.c,src/services.c,src/group.c,src/protocols.c,src/shadow.c: use
   the new parsing code

@@ -1,5 +1,5 @@
 Name: nss_directories
-Version: 0.2
+Version: 0.3
 Release: 1
 Source: %{name}-%{version}.tar.gz
 License: LGPL

@@ -3,7 +3,8 @@ moduleexec_LTLIBRARIES = libnss_directories.la
 
 EXTRA_libnss_directories_la_SOURCES = \
 	files-parse.c \
-	generic.c
+	generic.c \
+	parsers.h
 
 libnss_directories_la_SOURCES = \
 	glibc-parse.c \
