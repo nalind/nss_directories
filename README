@@ -1,0 +1,12 @@
+nss_directories
+
+nss_directories is a set of C library extensions which allow a directory
+full of files to be used as a primary source of user, group, and service
+information instead of or in addition to flat files or NIS.
+
+nss_files	nss_directories
+=========	===============
+/etc/passwd	/etc/passwd.d/*
+/etc/shadow	/etc/shadow.d/*
+/etc/group	/etc/group.d/*
+/etc/services	/etc/services.d/*
