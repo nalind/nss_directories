@@ -1,5 +1,5 @@
 Name: nss_directories
-Version: 0.1
+Version: 0.2
 Release: 1
 Source: %{name}-%{version}.tar.gz
 License: LGPL
@@ -29,9 +29,12 @@ rm -fr $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc README
+%doc README ChangeLog COPYING
 /%{_lib}/libnss_directories-*.so
 
 %changelog
+* Mon Nov 18 2002 Nalin Dahyabhai <nalin@redhat.com> 0.2-1
+- swallow parsing functions from glibc to avoid dependencies on private symbols
+
 * Sun Nov 17 2002 Nalin Dahyabhai <nalin@redhat.com> 0.1-1
 - initial version

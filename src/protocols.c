@@ -16,14 +16,34 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: protocols.c,v 1.1 2002/11/18 19:53:21 nalin Exp $"
+#ident "$Id: protocols.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
 
 #include <sys/types.h>
 #include <netdb.h>
 
+/* Shared information. */
 #define STRUCTURE protoent
-#define FILENAME  "protocols"
+#define DATABASE  "protocols"
 
+/* Parser. */
+#define ENTNAME   protoent
+struct protoent_data {};
+
+#define libc_hidden_def(ignored)
+#define _nss_files_parse_ _nss_directories_parse_
+
+#define TRAILING_LIST_MEMBER            p_aliases
+#define TRAILING_LIST_SEPARATOR_P       isspace
+
+#include "files-parse.c"
+
+LINE_PARSER
+("#",
+  STRING_FIELD (result->p_name, isspace, 1);
+  INT_FIELD (result->p_proto, isspace, 1, 10,);
+)
+
+/* Lookups. */
 #define getnam _nss_directories_getprotobyname_r
 #define getnam_field p_name
 #define getnam_fields p_aliases
@@ -35,7 +55,5 @@
 #define setent _nss_directories_setprotoent
 #define getent _nss_directories_getprotoent_r
 #define endent _nss_directories_endprotoent
-
-#define parser _nss_files_parse_protoent
 
 #include "generic.c"

@@ -16,7 +16,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: generic.c,v 1.1 2002/11/18 19:53:21 nalin Exp $"
+#ident "$Id: generic.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
 
 #include "../config.h"
 
@@ -32,13 +32,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "parsers.h"
-#include <pwd.h>
-
 #define CHUNK_SIZE LINE_MAX
 #define FALSE 0
 #define TRUE (!FALSE)
 
+/* Array of file name patterns we ignore. */
 static const char *skip_names[] = {
 	"*~",
 	"*.rpmsave",
@@ -46,6 +44,7 @@ static const char *skip_names[] = {
 	"*.rpmnew",
 };
 
+/* Return TRUE if we should ignore the file based on its name. */
 static int
 skip_file_by_name(const char *filename)
 {
@@ -58,6 +57,7 @@ skip_file_by_name(const char *filename)
 	return FALSE;
 }
 
+/* Read a line from the given file, no matter the length. */
 static char *
 read_line(FILE *fp)
 {
@@ -117,7 +117,7 @@ getgen(struct STRUCTURE *result,
 	char path[PATH_MAX], *line;
 
 	/* Start reading the directory. */
-	dir = opendir(SYSCONFDIR "/" FILENAME ".d");
+	dir = opendir(SYSCONFDIR "/" DATABASE ".d");
 	if (dir == NULL) {
 		*errnop = errno;
 		return NSS_STATUS_NOTFOUND;
@@ -131,7 +131,7 @@ getgen(struct STRUCTURE *result,
 		}
 
 		/* Figure out the full name of the file. */
-		snprintf(path, sizeof(path), SYSCONFDIR "/" FILENAME ".d/%s",
+		snprintf(path, sizeof(path), SYSCONFDIR "/" DATABASE ".d/%s",
 			 ent->d_name);
 
 		/* If we can't open it, skip it. */
@@ -268,9 +268,9 @@ setent(int stayopen)
 	/* Close and reopen the directory. */
 	endent();
 	LOCK();
-	dir = opendir(SYSCONFDIR "/" FILENAME ".d");
+	dir = opendir(SYSCONFDIR "/" DATABASE ".d");
 	UNLOCK();
-	return NSS_STATUS_UNAVAIL;
+	return (dir == NULL) ? NSS_STATUS_UNAVAIL : NSS_STATUS_SUCCESS;
 }
 enum nss_status
 getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
@@ -319,7 +319,7 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 				/* Formulate the full path name and try to
 				 * open it. */
 				snprintf(path, sizeof(path),
-					 SYSCONFDIR "/" FILENAME ".d/%s",
+					 SYSCONFDIR "/" DATABASE ".d/%s",
 					 ent->d_name);
 				fp = fopen(path, "r");
 
@@ -361,9 +361,9 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 		}
 
 		/* Try to parse the line. */
-		if (parser(line, &structure,
-			   (struct parser_data*) buffer, buflen,
-			   errnop) != 0) {
+		if (parse_line(line, &structure,
+			       (struct parser_data*) buffer, buflen,
+			       errnop) != 0) {
 			free(line);
 			*result = structure;
 			UNLOCK();

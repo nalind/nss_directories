@@ -16,14 +16,28 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: group.c,v 1.1 2002/11/18 19:53:21 nalin Exp $"
+#ident "$Id: group.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
 
+/* Shared information. */
 #define STRUCTURE group
-#define FILENAME  "group"
+#define DATABASE  "group"
 
+/* Parser. */
+#define ENTNAME   grent
+#define ENTDATA   grent_data
+struct grent_data {};
+
+#define libc_hidden_def(ignored)
+#define _nss_files_parse_ _nss_directories_parse_
+
+#define EXTERN_PARSER
+
+#include "files-parse.c"
+
+/* Lookup. */
 #define getnam _nss_directories_getgrnam_r
 #define getnam_field gr_name
 
@@ -35,6 +49,6 @@
 #define getent _nss_directories_getgrent_r
 #define endent _nss_directories_endgrent
 
-#define parser _nss_files_parse_grent
+#define parse_line _nss_directories_parse_grent
 
 #include "generic.c"

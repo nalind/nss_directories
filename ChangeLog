@@ -1,0 +1,10 @@
+2002-11-18 nalin
+* src/files-parse.c, src/glibc-parse.c: add glibc-based parsing internally
+* src/passwd.c,src/services.c,src/group.c,src/protocols.c,src/shadow.c: use
+  the new parsing code
+* src/generic.c (setent): return SUCCESS on successful open, not UNAVAIL
+* src/Makefile.am: export only _nss_directories_[sge]*, to export the setent,
+  getent/getby, and endent functions, but not the parsers.
+
+2002-11-18 nalin
+- initial check-in

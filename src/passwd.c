@@ -16,14 +16,28 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: passwd.c,v 1.1 2002/11/18 19:53:21 nalin Exp $"
+#ident "$Id: passwd.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
 
+/* Shared information. */
 #define STRUCTURE passwd
-#define FILENAME  "passwd"
+#define DATABASE  "passwd"
 
+/* Parser. */
+#define ENTNAME   pwent
+#define ENTDATA   pwent_data
+struct pwent_data {};
+
+#define libc_hidden_def(ignored)
+#define _nss_files_parse_ _nss_directories_parse_
+
+#define EXTERN_PARSER
+
+#include "files-parse.c"
+
+/* Lookup. */
 #define getnam _nss_directories_getpwnam_r
 #define getnam_field pw_name
 
@@ -35,6 +49,6 @@
 #define getent _nss_directories_getpwent_r
 #define endent _nss_directories_endpwent
 
-#define parser _nss_files_parse_pwent
+#define parse_line _nss_directories_parse_pwent
 
 #include "generic.c"

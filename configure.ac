@@ -19,12 +19,6 @@ then
 fi
 AC_SUBST(moduledir)
 
-AC_CHECK_LIB(nss_files,_nss_files_parse_pwent)
-AC_CHECK_LIB(nss_files,_nss_files_parse_grent)
-AC_CHECK_LIB(nss_files,_nss_files_parse_spent)
-AC_CHECK_LIB(nss_files,_nss_files_parse_servent)
-AC_CHECK_LIB(nss_files,_nss_files_parse_protoent)
-
 nss_files=`ls -1 "$moduledir"/libnss_files-*.so | head -1`
 GLIBC_VERSION=`basename "$nss_files" .so | cut -f2 -d-`
 AC_SUBST(GLIBC_VERSION)

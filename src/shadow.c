@@ -16,14 +16,28 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: shadow.c,v 1.1 2002/11/18 19:53:21 nalin Exp $"
+#ident "$Id: shadow.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
 
 #include <sys/types.h>
 #include <shadow.h>
 
+/* Shared information. */
 #define STRUCTURE spwd
-#define FILENAME  "shadow"
+#define DATABASE  "shadow"
 
+/* Parser. */
+#define ENTNAME   spent
+#define ENTDATA   spent_data
+struct spent_data {};
+
+#define libc_hidden_def(ignored)
+#define _nss_files_parse_ _nss_directories_parse_
+
+#define EXTERN_PARSER
+
+#include "files-parse.c"
+
+/* Lookups. */
 #define getnam _nss_directories_getspnam_r
 #define getnam_field sp_namp
 
@@ -31,6 +45,6 @@
 #define getent _nss_directories_getspent_r
 #define endent _nss_directories_endspent
 
-#define parser _nss_files_parse_spent
+#define parse_line _nss_directories_parse_spent
 
 #include "generic.c"

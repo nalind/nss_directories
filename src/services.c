@@ -16,14 +16,37 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: services.c,v 1.1 2002/11/18 19:53:21 nalin Exp $"
+#ident "$Id: services.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
 
 #include <sys/types.h>
 #include <netdb.h>
 
+/* Shared settings. */
 #define STRUCTURE servent
-#define FILENAME  "services"
+#define DATABASE  "services"
 
+/* Parser. */
+#define ENTNAME   servent
+struct servent_data {};
+
+#define libc_hidden_def(ignored)
+#define _nss_files_parse_ _nss_directories_parse_
+
+#define TRAILING_LIST_MEMBER            s_aliases
+#define TRAILING_LIST_SEPARATOR_P       isspace
+
+#include "files-parse.c"
+
+#define ISSLASH(__c) ((__c) == '/')
+
+LINE_PARSER
+("#",
+  STRING_FIELD (result->s_name, isspace, 1);
+  INT_FIELD (result->s_port, ISSLASH, 10, 0, htons);
+  STRING_FIELD (result->s_proto, isspace, 1);
+)
+
+/* Lookups. */
 #define getnam _nss_directories_getservbyname_r
 #define getnam_field s_name
 #define getnam_fields s_aliases
@@ -35,8 +58,6 @@
 #define setent _nss_directories_setservent
 #define getent _nss_directories_getservent_r
 #define endent _nss_directories_endservent
-
-#define parser _nss_files_parse_servent
 
 #define GET_EXTRA_CRITERIA const char *protocol
 #define EXTRA_CRITERIA_NAMES protocol
