@@ -1,7 +1,3 @@
 set -x
-libtoolize -f -c
-aclocal
-autoheader
-automake -a
-autoconf
+autoreconf
 ./configure --sysconfdir=/etc --with-moduledir=/lib/`gcc -print-multi-directory` $@
