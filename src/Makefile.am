@@ -15,7 +15,8 @@ libnss_directories_la_SOURCES = \
 	shadow.c
 
 libnss_directories_la_LDFLAGS = \
-	-version-info 2 -export-symbols-regex "_nss_directories_[sge].*"
+	-version-info 2 \
+	-export-symbols-regex "_nss_directories_[sge].*"
 
 install-exec-hook:
 	mv $(DESTDIR)/$(moduleexecdir)/libnss_directories.so.2.0.0 \

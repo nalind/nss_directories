@@ -16,7 +16,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: generic.c,v 1.3 2002/11/19 00:05:07 nalin Exp $"
+#ident "$Id: generic.c,v 1.4 2002/11/19 01:01:49 nalin Exp $"
 
 #include "../config.h"
 
@@ -116,6 +116,7 @@ getgen(struct STRUCTURE *result,
 	struct dirent *ent = NULL;
 	struct stat st;
 	char path[PATH_MAX], *line;
+	long offset;
 
 	/* Start reading the directory. */
 	dir = opendir(SYSCONFDIR "/" DATABASE ".d");
@@ -150,13 +151,34 @@ getgen(struct STRUCTURE *result,
 		}
 
 		/* Read the next line. */
+		offset = ftell(fp);
 		while ((line = read_line(fp)) != NULL) {
+			/* Check that we have room to save this. */
+			if (strlen(line) >= buflen) {
+				fseek(fp, offset, SEEK_SET);
+				free(line);
+				fclose(fp);
+				closedir(dir);
+				errno = ERANGE;
+				return NSS_STATUS_TRYAGAIN;
+			}
 			/* If we had trouble parsing it, continue. */
-			if (parse_line(line, &structure,
-				       (void *)buffer, buflen,
-				       errnop) == 0) {
+			switch (parse_line(line, &structure,
+					   (void *)buffer, buflen,
+					   errnop)) {
+			case 0:
 				free(line);
 				continue;
+				break;
+			case -1:
+				free(line);
+				fclose(fp);
+				closedir(dir);
+				errno = ERANGE;
+				return NSS_STATUS_TRYAGAIN;
+				break;
+			default:
+				break;
 			}
 			/* If it matches, close the file and the directory,
 			 * and return the answer. */
@@ -174,6 +196,7 @@ getgen(struct STRUCTURE *result,
 
 			/* Free this line. */
 			free(line);
+			offset = ftell(fp);
 		}
 
 		/* Close this file. */
@@ -280,6 +303,7 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 	struct dirent *ent;
 	struct stat st;
 	struct STRUCTURE structure;
+	long offset;
 
 	LOCK();
 
@@ -354,6 +378,7 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 		}
 
 		/* Read a line from the file. */
+		offset = ftell(fp);
 		line = read_line(fp);
 		if (line == NULL) {
 			fclose(fp);
@@ -361,14 +386,36 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 			continue;
 		}
 
+		/* Check that we have room to save this. */
+		if (strlen(line) >= buflen) {
+			free(line);
+			fseek(fp, offset, SEEK_SET);
+			errno = ERANGE;
+			return NSS_STATUS_TRYAGAIN;
+		}
+
 		/* Try to parse the line. */
-		if (parse_line(line, &structure,
-			       (void *) buffer, buflen,
-			       errnop) != 0) {
+		switch (parse_line(line, &structure,
+				   (void *)buffer, buflen,
+				   errnop)) {
+		case -1:
+			free(line);
+			fseek(fp, offset, SEEK_SET);
+			errno = ERANGE;
+			return NSS_STATUS_TRYAGAIN;
+			break;
+		case 0:
+			free(line);
+			continue;
+			break;
+		case 1:
 			free(line);
 			*result = structure;
 			UNLOCK();
 			return NSS_STATUS_SUCCESS;
+			break;
+		default:
+			break;
 		}
 
 		/* Try the next entry. */
