@@ -1,5 +1,5 @@
 Name: nss_directories
-Version: 0.4
+Version: 0.5
 Release: 1
 Source: %{name}-%{version}-%{release}.tar.gz
 License: LGPL
@@ -23,6 +23,11 @@ make
 %install
 rm -fr $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
+install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/passwd.d
+install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/shadow.d
+install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/group.d
+install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/protocols.d
+install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/services.d
 
 %clean
 rm -fr $RPM_BUILD_ROOT
@@ -31,12 +36,21 @@ rm -fr $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc README ChangeLog COPYING
 /%{_lib}/libnss_directories-*.so
+%dir %{_sysconfdir}/passwd.d
+%dir %{_sysconfdir}/shadow.d
+%dir %{_sysconfdir}/group.d
+%dir %{_sysconfdir}/protocols.d
+%dir %{_sysconfdir}/services.d
 
 %post -p /sbin/ldconfig
 
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Oct 30 2003 Nalin Dahyabhai <nalin@redhat.com> 0.5-1
+- include directories in the package
+- be more careful to stop double-frees from overzealous applications
+
 * Wed Oct 22 2003 Nalin Dahyabhai <nalin@redhat.com> 0.4-1
 - stop referencing previously-freed memory
 
