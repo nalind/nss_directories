@@ -1,7 +1,7 @@
 Name: nss_directories
-Version: 0.3
+Version: 0.4
 Release: 1
-Source: %{name}-%{version}.tar.gz
+Source: %{name}-%{version}-%{release}.tar.gz
 License: LGPL
 Group: System Environment/Libraries
 Summary: An NSS library which searches directories.
@@ -14,7 +14,7 @@ services, and shadow passwords (instead of or in addition to using flat
 files or NIS).
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-%{release}
 %configure --with-moduledir=/%{_lib}
 
 %build
@@ -37,6 +37,9 @@ rm -fr $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Oct 22 2003 Nalin Dahyabhai <nalin@redhat.com> 0.4-1
+- stop referencing previously-freed memory
+
 * Mon Nov 18 2002 Nalin Dahyabhai <nalin@redhat.com> 0.2-1
 - swallow parsing functions from glibc to avoid dependencies on private symbols
 

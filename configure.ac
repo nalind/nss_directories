@@ -1,6 +1,10 @@
 AC_INIT(README)
-AM_INIT_AUTOMAKE(nss_directories,0.1)
+VERSION=`awk '/^Version:/ {print $NF}' ${srcdir}/nss_directories.spec`
+RELEASE=`awk '/^Release:/ {print $NF}' ${srcdir}/nss_directories.spec`
+AM_INIT_AUTOMAKE(nss_directories, $VERSION)
 AM_PROG_LIBTOOL
+
+AC_SYS_LARGEFILE
 
 MYPREFIX=`eval echo $prefix`
 if test "$MYPREFIX" = NONE ; then
@@ -39,6 +43,8 @@ if test x$GCC = xyes ; then
 	CFLAGS="${CFLAGS} -Wuninitialized"
 fi
 
+AC_SUBST(VERSION)
+AC_SUBST(RELEASE)
 AM_CONFIG_HEADER(config.h)
 AC_OUTPUT(Makefile src/Makefile)
 

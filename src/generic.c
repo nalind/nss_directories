@@ -16,7 +16,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: generic.c,v 1.4 2002/11/19 01:01:49 nalin Exp $"
+#ident "$Id: generic.c,v 1.5 2003/10/23 01:44:42 nalin Exp $"
 
 #include "../config.h"
 
@@ -39,6 +39,8 @@
 
 /* Array of file name patterns we ignore. */
 static const char *skip_names[] = {
+	".*",
+	"*#",
 	"*~",
 	"*.rpmsave",
 	"*.rpmorig",
@@ -67,7 +69,7 @@ read_line(FILE *fp)
 
 	buflen = CHUNK_SIZE;
 	length = 0;
-	buffer = malloc(CHUNK_SIZE);
+	buffer = malloc(buflen);
 	if (buffer == NULL) {
 		return NULL;
 	}
@@ -88,8 +90,9 @@ read_line(FILE *fp)
 			}
 		}
 	}
+	length = strlen(buffer);
 
-	if (strlen(buffer) == 0) {
+	if (length == 0) {
 		free(buffer);
 		return NULL;
 	}
@@ -162,8 +165,10 @@ getgen(struct STRUCTURE *result,
 				errno = ERANGE;
 				return NSS_STATUS_TRYAGAIN;
 			}
+			/* Save it. */
+			strcpy(buffer, line);
 			/* If we had trouble parsing it, continue. */
-			switch (parse_line(line, &structure,
+			switch (parse_line(buffer, &structure,
 					   (void *)buffer, buflen,
 					   errnop)) {
 			case 0:
@@ -245,7 +250,7 @@ getnam(const char *name,
 static int
 compare_number(const void *compare_data, struct STRUCTURE *structure)
 {
-	return (structure->getnum_field != (getnum_type) compare_data);
+	return (structure->getnum_field != (getnum_type) (long) compare_data);
 }
 enum nss_status
 getnum(getnum_type number,
@@ -259,7 +264,7 @@ getnum(getnum_type number,
 		      EXTRA_CRITERIA_NAMES,
 #endif
 		      buffer, buflen, errnop,
-		      compare_number, (const void*) number);
+		      compare_number, (const void*) (long) number);
 }
 #endif
 #if defined(setent) && defined(getent) && defined(endent)
