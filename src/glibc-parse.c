@@ -25,6 +25,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <shadow.h>
+#include "parsers.h"
 
 #define libc_hidden_def(ignored)
 #define _nss_files_parse_ _nss_directories_parse_
