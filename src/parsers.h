@@ -16,7 +16,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: parsers.h,v 1.1 2002/11/18 19:53:21 nalin Exp $"
+/* External parsers. */
+
+#ident "$Id: parsers.h,v 1.2 2002/11/19 00:05:07 nalin Exp $"
 
 #ifndef parsers_h
 #define parsers_h
@@ -25,24 +27,19 @@
 #include <pwd.h>
 #include <grp.h>
 #include <shadow.h>
-#include <netdb.h>
 
-struct parser_data;
+struct pwent_data;
+struct grent_data;
+struct spent_data;
 
-extern int _nss_files_parse_pwent(char *line, struct passwd *result,
-				  struct parser_data *data, size_t datalen,
-				  int *errnop);
-extern int _nss_files_parse_grent(char *line, struct group *result,
-				  struct parser_data *data, size_t datalen,
-				  int *errnop);
-extern int _nss_files_parse_spent(char *line, struct spwd *result,
-				  struct parser_data *data, size_t datalen,
-				  int *errnop);
-extern int _nss_files_parse_servent(char *line, struct servent *result,
-				    struct parser_data *data, size_t datalen,
-				    int *errnop);
-extern int _nss_files_parse_protoent(char *line, struct protoent *result,
-				     struct parser_data *data, size_t datalen,
-				     int *errnop);
+int _nss_directories_parse_pwent(char *line, struct passwd *result,
+				 struct pwent_data *data, size_t datalen,
+				 int *errnop);
+int _nss_directories_parse_grent(char *line, struct group *result,
+				 struct grent_data *data, size_t datalen,
+				 int *errnop);
+int _nss_directories_parse_spent(char *line, struct spwd *result,
+				 struct spent_data *data, size_t datalen,
+				 int *errnop);
 
 #endif

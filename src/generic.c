@@ -16,7 +16,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: generic.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
+#ident "$Id: generic.c,v 1.3 2002/11/19 00:05:07 nalin Exp $"
 
 #include "../config.h"
 
@@ -26,11 +26,12 @@
 #include <errno.h>
 #include <fnmatch.h>
 #include <limits.h>
-#include <nss.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <nss.h>
 
 #define CHUNK_SIZE LINE_MAX
 #define FALSE 0
@@ -151,9 +152,9 @@ getgen(struct STRUCTURE *result,
 		/* Read the next line. */
 		while ((line = read_line(fp)) != NULL) {
 			/* If we had trouble parsing it, continue. */
-			if (parser(line, &structure,
-				   (struct parser_data*) buffer, buflen,
-				   errnop) == 0) {
+			if (parse_line(line, &structure,
+				       (void *)buffer, buflen,
+				       errnop) == 0) {
 				free(line);
 				continue;
 			}
@@ -362,7 +363,7 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 
 		/* Try to parse the line. */
 		if (parse_line(line, &structure,
-			       (struct parser_data*) buffer, buflen,
+			       (void *) buffer, buflen,
 			       errnop) != 0) {
 			free(line);
 			*result = structure;

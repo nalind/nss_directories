@@ -21,7 +21,25 @@ AC_SUBST(moduledir)
 
 nss_files=`ls -1 "$moduledir"/libnss_files-*.so | head -1`
 GLIBC_VERSION=`basename "$nss_files" .so | cut -f2 -d-`
+if test -z "$GLIBC_VERSION"
+then
+	GLIBC_VERSION=$PACKAGE_VERSION
+fi
 AC_SUBST(GLIBC_VERSION)
+
+if test x$GCC = xyes ; then
+	CFLAGS="${CFLAGS} -std=c99"
+	CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+	CFLAGS="${CFLAGS} -Wall"
+	CFLAGS="${CFLAGS} -Waggregate-return"
+	CFLAGS="${CFLAGS} -Wcast-align"
+	CFLAGS="${CFLAGS} -Wimplicit"
+	CFLAGS="${CFLAGS} -Wmissing-declarations"
+	CFLAGS="${CFLAGS} -Wmissing-prototypes"
+	CFLAGS="${CFLAGS} -Wpointer-arith"
+	CFLAGS="${CFLAGS} -Wstrict-prototypes"
+	CFLAGS="${CFLAGS} -Wuninitialized"
+fi
 
 AM_CONFIG_HEADER(config.h)
 AC_OUTPUT(Makefile src/Makefile)

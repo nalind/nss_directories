@@ -16,10 +16,11 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: group.c,v 1.2 2002/11/18 22:08:14 nalin Exp $"
+#ident "$Id: group.c,v 1.3 2002/11/19 00:05:07 nalin Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
+#include "parsers.h"
 
 /* Shared information. */
 #define STRUCTURE group
