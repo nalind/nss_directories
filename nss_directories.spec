@@ -32,6 +32,10 @@ rm -fr $RPM_BUILD_ROOT
 %doc README ChangeLog COPYING
 /%{_lib}/libnss_directories-*.so
 
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
 %changelog
 * Mon Nov 18 2002 Nalin Dahyabhai <nalin@redhat.com> 0.2-1
 - swallow parsing functions from glibc to avoid dependencies on private symbols
