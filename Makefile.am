@@ -13,9 +13,9 @@ force-tag:
 	cvs tag -cF $(CVSTAG)
 
 archive:
-	$(RM) -fr /tmp/$(NAME)
+	$(RM) -fr /tmp/$(NAME)-$(VERSION)
 	cd /tmp ; cvs -d $(shell cat $(top_srcdir)/CVS/Root) export -r $(CVSTAG) -d $(NAME)-$(VERSION) $(NAME)
 	cd /tmp/$(NAME)-$(VERSION) ; ./autogen.sh ; make distcheck
 	mv /tmp/$(NAME)-$(VERSION)/$(NAME)-$(VERSION).tar.* $(top_srcdir)/
-	$(RM) -fr /tmp/$(NAME)
+	$(RM) -fr /tmp/$(NAME)-$(VERSION)
 	
