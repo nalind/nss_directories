@@ -20,3 +20,6 @@ archive:
 	cd /tmp/$(NAME)-$(VERSION)-$(RELEASE) ; ./autogen.sh ; make distcheck
 	mv -v /tmp/$(NAME)-$(VERSION)-$(RELEASE)/$(NAME)-*.*.tar.* $(top_srcdir)/
 	$(RM) -fr /tmp/$(NAME)-$(VERSION)-$(RELEASE)
+
+srpm: archive
+	rpmbuild -ts $(NAME)-$(VERSION)-$(RELEASE).tar.gz
