@@ -16,7 +16,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: generic.c,v 1.5 2003/10/23 01:44:42 nalin Exp $"
+#ident "$Id: generic.c,v 1.6 2003/11/04 19:34:52 nalin Exp $"
 
 #include "../config.h"
 
@@ -150,6 +150,7 @@ getgen(struct STRUCTURE *result,
 		if ((fstat(fileno(fp), &st) != 0) ||
 		    (!S_ISREG(st.st_mode) && !S_ISLNK(st.st_mode))) {
 			fclose(fp);
+			fp = NULL;
 			continue;
 		}
 
@@ -161,7 +162,9 @@ getgen(struct STRUCTURE *result,
 				fseek(fp, offset, SEEK_SET);
 				free(line);
 				fclose(fp);
+				fp = NULL;
 				closedir(dir);
+				dir = NULL;
 				errno = ERANGE;
 				return NSS_STATUS_TRYAGAIN;
 			}
@@ -178,7 +181,9 @@ getgen(struct STRUCTURE *result,
 			case -1:
 				free(line);
 				fclose(fp);
+				fp = NULL;
 				closedir(dir);
+				dir = NULL;
 				errno = ERANGE;
 				return NSS_STATUS_TRYAGAIN;
 				break;
@@ -195,7 +200,9 @@ getgen(struct STRUCTURE *result,
 				*result = structure;
 				free(line);
 				fclose(fp);
+				fp = NULL;
 				closedir(dir);
+				dir = NULL;
 				return NSS_STATUS_SUCCESS;
 			}
 
@@ -206,10 +213,12 @@ getgen(struct STRUCTURE *result,
 
 		/* Close this file. */
 		fclose(fp);
+		fp = NULL;
 	}
 
 	/* Close this directory. */
 	closedir(dir);
+	dir = NULL;
 
 	/* Tell the caller that we didn't find anything. */
 	return NSS_STATUS_NOTFOUND;
