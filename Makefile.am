@@ -17,6 +17,6 @@ distdir = $(NAME)-$(VERSION)-$(RELEASE)
 archive:
 	$(RM) -fr /tmp/$(NAME)-$(VERSION)
 	cd /tmp ; cvs -d $(shell cat $(top_srcdir)/CVS/Root) export -r $(CVSTAG) -d $(NAME)-$(VERSION)-$(RELEASE) $(NAME)
-	cd /tmp/$(NAME)-$(VERSION) ; ./autogen.sh ; make distcheck
-	mv -v /tmp/$(NAME)-$(VERSION)/$(NAME)-*.*.tar.* $(top_srcdir)/
-	$(RM) -fr /tmp/$(NAME)-$(VERSION)
+	cd /tmp/$(NAME)-$(VERSION)-$(RELEASE) ; ./autogen.sh ; make distcheck
+	mv -v /tmp/$(NAME)-$(VERSION)-$(RELEASE)/$(NAME)-*.*.tar.* $(top_srcdir)/
+	$(RM) -fr /tmp/$(NAME)-$(VERSION)-$(RELEASE)
