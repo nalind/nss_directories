@@ -1,52 +1,14 @@
-AC_INIT(README)
-VERSION=`awk '/^Version:/ {print $NF}' ${srcdir}/nss_directories.spec`
-RELEASE=`awk '/^Release:/ {print $NF}' ${srcdir}/nss_directories.spec`
-AM_INIT_AUTOMAKE(nss_directories, $VERSION)
+AC_INIT(nss_directories,0.6)
+AC_CONFIG_SRCDIR([README])
+AM_INIT_AUTOMAKE(foreign)
 AM_PROG_LIBTOOL
-
 AC_SYS_LARGEFILE
-
-MYPREFIX=`eval echo $prefix`
-if test "$MYPREFIX" = NONE ; then
-	MYPREFIX="$ac_default_prefix"
-	MYSYSCONFDIR=`eval echo $sysconfdir | sed "s|NONE|$MYPREFIX|g"`
-else
-	MYSYSCONFDIR=`eval echo $sysconfdir`
-fi
-
-AC_DEFINE_UNQUOTED(SYSCONFDIR,"$MYSYSCONFDIR",[Define to the top-level data directory.])
-
-AC_ARG_WITH(moduledir,[  --with-moduledir=DIR    directory to install modules in (default /lib)],[moduledir="$withval"])
-if ! test -n "$moduledir"
-then
-	moduledir=/lib
-fi
-AC_SUBST(moduledir)
-
-nss_files=`ls -1 "$moduledir"/libnss_files-*.so | head -1`
-GLIBC_VERSION=`basename "$nss_files" .so | cut -f2 -d-`
-if test -z "$GLIBC_VERSION"
-then
-	GLIBC_VERSION=$PACKAGE_VERSION
-fi
-AC_SUBST(GLIBC_VERSION)
-
-if test x$GCC = xyes ; then
-	CFLAGS="${CFLAGS} -std=c99"
-	CFLAGS="${CFLAGS} -D_GNU_SOURCE"
-	CFLAGS="${CFLAGS} -Wall"
-	CFLAGS="${CFLAGS} -Waggregate-return"
-	CFLAGS="${CFLAGS} -Wcast-align"
-	CFLAGS="${CFLAGS} -Wimplicit"
-	CFLAGS="${CFLAGS} -Wpointer-arith"
-	CFLAGS="${CFLAGS} -Wstrict-prototypes"
-	CFLAGS="${CFLAGS} -Wuninitialized"
-fi
-
+AM_MAINTAINER_MODE
 AC_SUBST(VERSION)
 AC_SUBST(RELEASE)
-AM_CONFIG_HEADER(config.h)
-AC_OUTPUT(Makefile src/Makefile)
-
-AC_MSG_RESULT([Reading data from sysconfdir = "$MYSYSCONFDIR".])
-AC_MSG_RESULT([Installing modules to "$moduledir".])
+AH_BOTTOM([
+#define SYSTEM_DATABASE_DIR "/etc"
+])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_FILES([Makefile src/Makefile])
+AC_OUTPUT

@@ -1,7 +1,7 @@
 Name: nss_directories
-Version: 0.5
+Version: 0.6
 Release: 1
-Source: %{name}-%{version}-%{release}.tar.gz
+Source: %{name}-%{version}.tar.gz
 License: LGPL
 Group: System Environment/Libraries
 Summary: An NSS library which searches directories.
@@ -14,8 +14,8 @@ services, and shadow passwords (instead of or in addition to using flat
 files or NIS).
 
 %prep
-%setup -q -n %{name}-%{version}-%{release}
-%configure --with-moduledir=/%{_lib}
+%setup -q
+%configure --libdir=/%{_lib}
 
 %build
 make
@@ -28,6 +28,10 @@ install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/shadow.d
 install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/group.d
 install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/protocols.d
 install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/services.d
+rm $RPM_BUILD_ROOT/%{_lib}/*.a
+rm $RPM_BUILD_ROOT/%{_lib}/*.la
+rm $RPM_BUILD_ROOT/%{_lib}/*.so
+rm $RPM_BUILD_ROOT/%{_lib}/*.so.?
 
 %clean
 rm -fr $RPM_BUILD_ROOT
@@ -35,7 +39,7 @@ rm -fr $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc README ChangeLog COPYING
-/%{_lib}/libnss_directories-*.so
+/%{_lib}/libnss_directories*
 %dir %{_sysconfdir}/passwd.d
 %dir %{_sysconfdir}/shadow.d
 %dir %{_sysconfdir}/group.d
@@ -47,6 +51,10 @@ rm -fr $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Mar 17 2005 Nalin Dahyabhai <nalin@redhat.com> 0.6-1
+- fix a referring-to-freed-memory bug
+- update autotools machinery
+
 * Thu Oct 30 2003 Nalin Dahyabhai <nalin@redhat.com> 0.5-1
 - include directories in the package
 - be more careful to stop double-frees from overzealous applications

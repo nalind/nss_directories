@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 Red Hat, Inc.
+ * Copyright (C) 2002,2005 Red Hat, Inc.
  *
  * This is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Library General Public License as published by
@@ -16,7 +16,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ident "$Id: generic.c,v 1.6 2003/11/04 19:34:52 nalin Exp $"
+#ident "$Id: generic.c,v 1.7 2005/03/18 01:24:22 nalin Exp $"
 
 #include "../config.h"
 
@@ -51,7 +51,7 @@ static const char *skip_names[] = {
 static int
 skip_file_by_name(const char *filename)
 {
-	int i;
+	unsigned int i;
 	for (i = 0; i < sizeof(skip_names) / sizeof(skip_names[0]); i++) {
 		if (fnmatch(skip_names[i], filename, 0) == 0) {
 			return TRUE;
@@ -64,7 +64,7 @@ skip_file_by_name(const char *filename)
 static char *
 read_line(FILE *fp)
 {
-	char *buffer;
+	char *buffer, *t;
 	size_t buflen, length;
 
 	buflen = CHUNK_SIZE;
@@ -73,7 +73,7 @@ read_line(FILE *fp)
 	if (buffer == NULL) {
 		return NULL;
 	}
-	memset(buffer, 0, buflen);
+	memset(buffer, '\0', buflen);
 
 	while (fgets(buffer + length, buflen - length, fp) != NULL) {
 		length = strlen(buffer);
@@ -82,11 +82,13 @@ read_line(FILE *fp)
 				break;
 			} else {
 				buflen += CHUNK_SIZE;
-				buffer = realloc(buffer, buflen);
-				if (buffer == NULL) {
+				t = realloc(buffer, buflen);
+				if (t == NULL) {
+					free(buffer);
 					return NULL;
 				}
-				memset(buffer + length, 0, buflen - length);
+				buffer = t;
+				memset(buffer + length, '\0', buflen - length);
 			}
 		}
 	}
@@ -119,10 +121,9 @@ getgen(struct STRUCTURE *result,
 	struct dirent *ent = NULL;
 	struct stat st;
 	char path[PATH_MAX], *line;
-	long offset;
 
 	/* Start reading the directory. */
-	dir = opendir(SYSCONFDIR "/" DATABASE ".d");
+	dir = opendir(SYSTEM_DATABASE_DIR "/" DATABASE ".d");
 	if (dir == NULL) {
 		*errnop = errno;
 		return NSS_STATUS_NOTFOUND;
@@ -136,7 +137,8 @@ getgen(struct STRUCTURE *result,
 		}
 
 		/* Figure out the full name of the file. */
-		snprintf(path, sizeof(path), SYSCONFDIR "/" DATABASE ".d/%s",
+		snprintf(path, sizeof(path),
+			 SYSTEM_DATABASE_DIR "/" DATABASE ".d/%s",
 			 ent->d_name);
 
 		/* If we can't open it, skip it. */
@@ -155,12 +157,11 @@ getgen(struct STRUCTURE *result,
 		}
 
 		/* Read the next line. */
-		offset = ftell(fp);
 		while ((line = read_line(fp)) != NULL) {
 			/* Check that we have room to save this. */
 			if (strlen(line) >= buflen) {
-				fseek(fp, offset, SEEK_SET);
 				free(line);
+				line = NULL;
 				fclose(fp);
 				fp = NULL;
 				closedir(dir);
@@ -176,6 +177,7 @@ getgen(struct STRUCTURE *result,
 					   errnop)) {
 			case 0:
 				free(line);
+				line = NULL;
 				continue;
 				break;
 			case -1:
@@ -199,6 +201,7 @@ getgen(struct STRUCTURE *result,
 			    TRUE) {
 				*result = structure;
 				free(line);
+				line = NULL;
 				fclose(fp);
 				fp = NULL;
 				closedir(dir);
@@ -208,7 +211,7 @@ getgen(struct STRUCTURE *result,
 
 			/* Free this line. */
 			free(line);
-			offset = ftell(fp);
+			line = NULL;
 		}
 
 		/* Close this file. */
@@ -306,7 +309,7 @@ setent(int stayopen)
 	/* Close and reopen the directory. */
 	endent();
 	LOCK();
-	dir = opendir(SYSCONFDIR "/" DATABASE ".d");
+	dir = opendir(SYSTEM_DATABASE_DIR "/" DATABASE ".d");
 	UNLOCK();
 	return (dir == NULL) ? NSS_STATUS_UNAVAIL : NSS_STATUS_SUCCESS;
 }
@@ -358,7 +361,8 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 				/* Formulate the full path name and try to
 				 * open it. */
 				snprintf(path, sizeof(path),
-					 SYSCONFDIR "/" DATABASE ".d/%s",
+					 SYSTEM_DATABASE_DIR "/"
+					 DATABASE ".d/%s",
 					 ent->d_name);
 				fp = fopen(path, "r");
 
@@ -409,20 +413,25 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 		}
 
 		/* Try to parse the line. */
-		switch (parse_line(line, &structure,
+		strcpy(buffer, line);
+		switch (parse_line(buffer, &structure,
 				   (void *)buffer, buflen,
 				   errnop)) {
 		case -1:
+			/* out of space */
 			free(line);
 			fseek(fp, offset, SEEK_SET);
 			errno = ERANGE;
 			return NSS_STATUS_TRYAGAIN;
 			break;
 		case 0:
+			/* parse error (invalid format) */
 			free(line);
+			line = NULL;
 			continue;
 			break;
 		case 1:
+			/* success */
 			free(line);
 			*result = structure;
 			UNLOCK();
@@ -434,6 +443,7 @@ getent(struct STRUCTURE *result, char *buffer, size_t buflen, int *errnop)
 
 		/* Try the next entry. */
 		free(line);
+		line = NULL;
 	} while (1);
 
 	/* We never really get here, but oh well. */

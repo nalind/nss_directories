@@ -1,3 +1,7 @@
+2005-03-17 nalin
+* src/generic.c: don't leak memory if realloc() fails.
+* src/generic.c: don't refer to freed memory in getXXent_r.
+
 2003-11-04 nalin
 * src/generic.c: clear pointers when we free them so that apps which call our
   end.... functions again don't cause us to double-free
