@@ -4,7 +4,7 @@ DISTCHECK_CONFIGURE_FLAGS = --with-moduledir=$$dc_install_base/modules
 
 NAME = nss_directories
 VERSION=@VERSION@
-CVSTAG = $(shell echo $(NAME)-$(VERSION) | sed -e s,\\.,_,g -e s,-,_,g)
+CVSTAG = $(shell echo $(NAME)-$(VERSION) | sed -e s,\\.,_,g)
 
 tag:
 	cvs tag -c $(CVSTAG)
