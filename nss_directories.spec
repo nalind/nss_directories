@@ -1,17 +1,17 @@
 Name: nss_directories
 Version: 0.6
-Release: 1
+Release: 2
 Source: %{name}-%{version}.tar.gz
 License: LGPL
 Group: System Environment/Libraries
-Summary: An NSS library which searches directories.
+Summary: An NSS library which searches directories containing multiple files
 BuildRoot: %{_tmppath}/%{name}-root
 
 %description
-Nss_directories is a set of C library extensions which allow a set of
-files in a directory to be used as a primary source of groups, users,
-services, and shadow passwords (instead of or in addition to using flat
-files or NIS).
+The nss_directories module is a set of C library extensions which
+allow a set of files in a directory to be used as a primary source of
+groups, users, services, and shadow passwords (instead of or in
+addition to using flat files or NIS).
 
 %prep
 %setup -q
@@ -28,10 +28,20 @@ install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/shadow.d
 install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/group.d
 install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/protocols.d
 install -d -m755 $RPM_BUILD_ROOT/%{_sysconfdir}/services.d
+rm $RPM_BUILD_ROOT/%{_lib}/*.so
 rm $RPM_BUILD_ROOT/%{_lib}/*.a
 rm $RPM_BUILD_ROOT/%{_lib}/*.la
-rm $RPM_BUILD_ROOT/%{_lib}/*.so
-rm $RPM_BUILD_ROOT/%{_lib}/*.so.?
+
+touch $RPM_BUILD_ROOT/topdir
+install -d -m755 $RPM_BUILD_ROOT/%{_libdir}/
+topdir=
+while ! test -f $RPM_BUILD_ROOT/%{_libdir}/$topdir/topdir ; do
+	topdir=..${topdir:+/${topdir}}
+done
+pushd $RPM_BUILD_ROOT/%{_libdir}
+ln -sf ${topdir}/%{_lib}/libnss_directories.so.? libnss_directories.so
+popd
+rm -f $RPM_BUILD_ROOT/topdir
 
 %clean
 rm -fr $RPM_BUILD_ROOT
@@ -40,6 +50,7 @@ rm -fr $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc README ChangeLog COPYING
 /%{_lib}/libnss_directories*
+%{_libdir}/libnss_directories.so
 %dir %{_sysconfdir}/passwd.d
 %dir %{_sysconfdir}/shadow.d
 %dir %{_sysconfdir}/group.d
@@ -51,6 +62,9 @@ rm -fr $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Sep 29 2005 Nalin Dahyabhai <nalin@redhat.com> 0.6-2
+- clean up symlinks
+
 * Thu Mar 17 2005 Nalin Dahyabhai <nalin@redhat.com> 0.6-1
 - fix a referring-to-freed-memory bug
 - update autotools machinery
